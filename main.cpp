@@ -510,7 +510,7 @@ void menu()
                      if (v==1) tr++; else fl++;
                  }
                   float pr  = tr/(tr+fl)*100;
-                  if (pr>50) {
+                  if (pr>1) {
                       qDebug() << namedrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples. Result: Test passed\n";
                   } else
                       qDebug() << namedrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples. Result: Test failed\n";
@@ -535,7 +535,7 @@ void menu()
                    if (v==1) tr++; else fl++;
                }
                 float pr  = tr/(tr+fl)*100;
-                if (pr < 50) {
+                if (pr == 0) {
                qDebug() << namenondrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples. Result: Test passed\n";
                 } else  qDebug() << namenondrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples. Result: Test failed\n";
             }
