@@ -426,15 +426,7 @@ void Savefunc(QList<QList<func>> &samples_func, QString path)
 
 void menu()
 {
-    int choice;
-        do
-        {
-            std::cout << "Menu:\n1. Check existing files from 'test' folder\n2. Select a file to check\n3. Close\n" << std::endl;
-            std::cin >> choice;
-            switch (choice)
-            {
-            case 1:
-            {
+
               QString path = "./datasets/train/func.log";
               QFile file(path);
               QStringList aStringList = allFileToString(file).split("\n");
@@ -518,7 +510,12 @@ void menu()
                      if (v==1) tr++; else fl++;
                  }
                   float pr  = tr/(tr+fl)*100;
-                 qDebug() << namedrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples.\n";}
+                  if (pr>50) {
+                      qDebug() << namedrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples. Result: Test passed\n";
+                  } else
+                      qDebug() << namedrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples. Result: Test failed\n";
+                      }
+
               qDebug() << "Hypothesis non-drone:\n";
             for (int m = 0; m < 7;m++){
             QFile file_2(path_3[m]);
@@ -538,75 +535,10 @@ void menu()
                    if (v==1) tr++; else fl++;
                }
                 float pr  = tr/(tr+fl)*100;
-               qDebug() << namenondrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples.\n";}
-
-              break;
+                if (pr < 50) {
+               qDebug() << namenondrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples. Result: Test passed\n";
+                } else  qDebug() << namenondrones[m]<< ": Drone detected in " << tr << "("<<pr<<"%) samples. Result: Test failed\n";
             }
-            case 2:
-            {
-                std::string path;
-                std::cout << "Enter the full path to the file" << std::endl;
-                std::cin >> path;
-                QList <Frame> frames;
-                Graph graph;
-                QList<QList<Frame>> data;
-                ReadLog(frames,QString::fromStdString(path));
-                Framesstat(frames,graph);
-                Framesdata(graph,data);
-                QList<QList<func>> samples_func;
-                Framessamples(data,samples_func);
-                Savefunc(samples_func,QString::fromStdString(path));
-                QString path_2 = "./datasets/train/func.log";
-                QFile file(path_2);
-                QStringList aStringList = allFileToString(file).split("\n");
-                size_t col_line = aStringList.size() - 1; // Count of line
-                size_t col_digits = aStringList.at(0).count(" ") + 1; // Count of digits in line
-                alglib::decisionforestbuilder builder;
-                alglib::ae_int_t nvars = 27;
-                alglib::ae_int_t nclasses = 2;
-                alglib::real_2d_array train;
-                alglib::ae_int_t npoints;
-                npoints = col_line;
-                train.setlength(npoints,nvars+1);
-                for (size_t i = 0; i < col_line; ++i) {
-                       for (size_t j = 0; j < col_digits; ++j) {
-                           train(i,j) = aStringList.at(i).split(" ").at(j).toInt();
-                       }
-                   }
-                dfbuildercreate(builder);
-                dfbuildersetdataset(builder, train, npoints, nvars, nclasses);
-                alglib::ae_int_t ntrees = 100;
-                alglib::decisionforest forest;
-                alglib::dfreport rep;
-                dfbuilderbuildrandomforest(builder, ntrees, forest, rep);
-                QRegularExpression f("/fram.+.log");
-                QString path_3 = QString::fromStdString(path).remove(f) + "/func.log";
-                QFile file_2(path_3);
-                QStringList aStringList_2 = allFileToString(file_2).split("\n");
-                size_t col_line_2 = aStringList_2.size(); // Count of line
-                size_t col_digits_2 = aStringList_2.at(0).count(" ") + 1;
-                alglib::real_1d_array e;
-                e.setlength(27);
-                float tr = 0;
-                float fl = 0;
-                for (size_t i = 0; i < col_line_2; ++i) {
-                       for (size_t j = 0; j < col_digits_2; ++j) {
-                           e(j) = aStringList_2.at(i).split(" ").at(j).toInt();
-                       }
-                       alglib::ae_int_t v;
-                       v = dfclassify(forest, e);
-                       if (v==1) tr++; else fl++;
-                   }
-                    float pr  = tr/(tr+fl)*100;
-                   qDebug() << "Drone detected in " << tr << "("<<pr<<"%) samples.\n";
-                break;
-            }
-            case 3:
-                choice = 0;
-                break;
-             }
-
-        } while (choice != 0);
 }
 
 
